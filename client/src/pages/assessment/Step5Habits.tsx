@@ -17,6 +17,26 @@ export default function Step5Habits() {
     });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.06,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4 },
+    },
+  };
+
   const sleepQualityOptions = [
     { value: 'poor', label: 'Ruim', emoji: '😴' },
     { value: 'fair', label: 'Razoável', emoji: '😐' },
@@ -54,31 +74,44 @@ export default function Step5Habits() {
       transition={{ duration: 0.3 }}
     >
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Seus Hábitos
-          </h1>
-          <span className="text-sm font-medium text-muted-foreground">
-            Etapa 5 de 8
-          </span>
+      <motion.div
+        className="mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+              Etapa 5 de 8
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+              Seus Hábitos
+            </h1>
+          </div>
         </div>
-        <div className="w-full bg-border rounded-full h-1">
-          <div className="bg-primary h-1 rounded-full" style={{ width: '62.5%' }} />
+
+        {/* Progress Bar */}
+        <div className="w-full bg-border rounded-full h-1.5 overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-primary to-blue-400"
+            initial={{ width: '0%' }}
+            animate={{ width: '62.5%' }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          />
         </div>
-      </div>
+      </motion.div>
 
       {/* Form Container */}
       <div className="flex-1 max-w-2xl mx-auto w-full overflow-y-auto">
         <motion.div
-          className="space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          className="space-y-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
           {/* Qualidade do Sono */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Qualidade do seu sono?</Label>
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label className="text-sm font-semibold text-foreground">Qualidade do seu sono?</Label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {sleepQualityOptions.map((option) => (
                 <motion.button
@@ -97,11 +130,11 @@ export default function Step5Habits() {
                 </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Horas de Sono */}
-          <div className="space-y-3">
-            <Label htmlFor="sleepHours" className="text-base font-medium">
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label htmlFor="sleepHours" className="text-sm font-semibold text-foreground">
               Quantas horas você dorme por noite?
             </Label>
             <div className="flex items-center gap-4">
@@ -117,11 +150,11 @@ export default function Step5Habits() {
                 {habitsData.sleepHours || 7}h
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Álcool */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Consumo de álcool?</Label>
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label className="text-sm font-semibold text-foreground">Consumo de álcool?</Label>
             <RadioGroup value={habitsData.alcoholConsumption} onValueChange={(value) => handleInputChange('alcoholConsumption', value)}>
               <div className="space-y-2">
                 {alcoholOptions.map((option) => (
@@ -137,11 +170,11 @@ export default function Step5Habits() {
                 ))}
               </div>
             </RadioGroup>
-          </div>
+          </motion.div>
 
           {/* Fumo */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Você fuma?</Label>
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label className="text-sm font-semibold text-foreground">Você fuma?</Label>
             <RadioGroup value={habitsData.smoking} onValueChange={(value) => handleInputChange('smoking', value)}>
               <div className="space-y-2">
                 {smokingOptions.map((option) => (
@@ -157,11 +190,11 @@ export default function Step5Habits() {
                 ))}
               </div>
             </RadioGroup>
-          </div>
+          </motion.div>
 
           {/* Nível de Estresse */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Seu nível de estresse?</Label>
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label className="text-sm font-semibold text-foreground">Seu nível de estresse?</Label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {stressOptions.map((option) => (
                 <motion.button
@@ -180,11 +213,11 @@ export default function Step5Habits() {
                 </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Consumo de Água */}
-          <div className="space-y-3">
-            <Label htmlFor="waterIntake" className="text-base font-medium">
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label htmlFor="waterIntake" className="text-sm font-semibold text-foreground">
               Quantos litros de água você bebe por dia?
             </Label>
             <div className="flex items-center gap-4">
@@ -200,22 +233,22 @@ export default function Step5Habits() {
                 {habitsData.waterIntake || 2}L
               </span>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
       </div>
 
       {/* Navigation Buttons */}
       <motion.div
-        className="flex gap-4 mt-8 pt-6 border-t border-border"
+        className="flex gap-3 mt-8 pt-6 border-t border-border"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.3 }}
       >
         <Button
           variant="outline"
           size="lg"
           onClick={prevStep}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Voltar
@@ -223,7 +256,7 @@ export default function Step5Habits() {
         <Button
           size="lg"
           onClick={nextStep}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           Próximo
           <ChevronRight className="w-4 h-4 ml-2" />

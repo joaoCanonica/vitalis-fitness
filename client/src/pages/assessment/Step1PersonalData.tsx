@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAssessment } from '@/contexts/AssessmentContext';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 
@@ -16,12 +15,42 @@ export default function Step1PersonalData() {
     });
   };
 
+  const handleGenderSelect = (gender: 'male' | 'female' | 'other') => {
+    handleInputChange('gender', gender);
+  };
+
   const isValid =
     personalData.fullName &&
     personalData.age &&
     personalData.height &&
     personalData.weight &&
     personalData.gender;
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.06,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4 },
+    },
+  };
+
+  const genderOptions = [
+    { value: 'male', label: 'Masculino', emoji: '👨' },
+    { value: 'female', label: 'Feminino', emoji: '👩' },
+    { value: 'other', label: 'Outro', emoji: '🧑' },
+  ];
 
   return (
     <motion.div
@@ -31,155 +60,147 @@ export default function Step1PersonalData() {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Header com progresso */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Dados Básicos
-          </h1>
-          <span className="text-sm font-medium text-muted-foreground">
-            Etapa 1 de 8
-          </span>
+      {/* Header */}
+      <motion.div className="mb-8" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+              Etapa 1 de 8
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+              Seus Dados Básicos
+            </h1>
+          </div>
         </div>
-        <div className="w-full bg-border rounded-full h-1">
-          <div className="bg-primary h-1 rounded-full" style={{ width: '12.5%' }} />
+
+        {/* Progress Bar */}
+        <div className="w-full bg-border rounded-full h-1.5 overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-primary to-blue-400"
+            initial={{ width: '0%' }}
+            animate={{ width: '12.5%' }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          />
         </div>
-      </div>
+      </motion.div>
 
       {/* Form Container */}
-      <div className="flex-1 max-w-2xl mx-auto w-full">
+      <div className="flex-1 max-w-2xl mx-auto w-full overflow-y-auto">
         <motion.div
           className="space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
           {/* Nome Completo */}
-          <div className="space-y-2">
-            <Label htmlFor="fullName" className="text-base font-medium">
+          <motion.div className="space-y-2.5" variants={itemVariants}>
+            <Label htmlFor="fullName" className="text-sm font-semibold text-foreground">
               Nome Completo
             </Label>
             <Input
               id="fullName"
-              placeholder="Digite seu nome completo"
+              placeholder="João Silva"
               value={personalData.fullName}
               onChange={(e) => handleInputChange('fullName', e.target.value)}
-              className="h-12 text-base"
+              className="h-11 text-base"
             />
-          </div>
+          </motion.div>
 
-          {/* Idade */}
-          <div className="space-y-2">
-            <Label htmlFor="age" className="text-base font-medium">
-              Idade (anos)
-            </Label>
-            <Input
-              id="age"
-              type="number"
-              placeholder="Ex: 28"
-              value={personalData.age}
-              onChange={(e) => handleInputChange('age', e.target.value ? parseInt(e.target.value) : '')}
-              className="h-12 text-base"
-              min="13"
-              max="120"
-            />
+          {/* Idade e Sexo - lado a lado */}
+          <div className="grid grid-cols-2 gap-4">
+            <motion.div className="space-y-2.5" variants={itemVariants}>
+              <Label htmlFor="age" className="text-sm font-semibold text-foreground">
+                Idade
+              </Label>
+              <Input
+                id="age"
+                type="number"
+                placeholder="28"
+                value={personalData.age}
+                onChange={(e) => handleInputChange('age', parseInt(e.target.value) || '')}
+                className="h-11 text-base"
+              />
+            </motion.div>
+
+            <motion.div className="space-y-2.5" variants={itemVariants}>
+              <Label htmlFor="weight" className="text-sm font-semibold text-foreground">
+                Peso (kg)
+              </Label>
+              <Input
+                id="weight"
+                type="number"
+                placeholder="75"
+                value={personalData.weight}
+                onChange={(e) => handleInputChange('weight', parseInt(e.target.value) || '')}
+                className="h-11 text-base"
+              />
+            </motion.div>
           </div>
 
           {/* Altura */}
-          <div className="space-y-2">
-            <Label htmlFor="height" className="text-base font-medium">
+          <motion.div className="space-y-2.5" variants={itemVariants}>
+            <Label htmlFor="height" className="text-sm font-semibold text-foreground">
               Altura (cm)
             </Label>
             <Input
               id="height"
               type="number"
-              placeholder="Ex: 178"
+              placeholder="180"
               value={personalData.height}
-              onChange={(e) => handleInputChange('height', e.target.value ? parseInt(e.target.value) : '')}
-              className="h-12 text-base"
-              min="100"
-              max="250"
+              onChange={(e) => handleInputChange('height', parseInt(e.target.value) || '')}
+              className="h-11 text-base"
             />
-          </div>
-
-          {/* Peso */}
-          <div className="space-y-2">
-            <Label htmlFor="weight" className="text-base font-medium">
-              Peso (kg)
-            </Label>
-            <Input
-              id="weight"
-              type="number"
-              placeholder="Ex: 75.5"
-              value={personalData.weight}
-              onChange={(e) => handleInputChange('weight', e.target.value ? parseFloat(e.target.value) : '')}
-              className="h-12 text-base"
-              step="0.1"
-              min="30"
-              max="300"
-            />
-          </div>
+          </motion.div>
 
           {/* Sexo */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium">Sexo</Label>
-            <RadioGroup value={personalData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
-              <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
-                <RadioGroupItem value="male" id="male" />
-                <Label htmlFor="male" className="cursor-pointer font-normal flex-1">
-                  Masculino
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
-                <RadioGroupItem value="female" id="female" />
-                <Label htmlFor="female" className="cursor-pointer font-normal flex-1">
-                  Feminino
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2 p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer">
-                <RadioGroupItem value="other" id="other" />
-                <Label htmlFor="other" className="cursor-pointer font-normal flex-1">
-                  Outro
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
+          <motion.div className="space-y-3" variants={itemVariants}>
+            <Label className="text-sm font-semibold text-foreground">
+              Sexo
+            </Label>
+            <div className="grid grid-cols-3 gap-3">
+              {genderOptions.map((option) => (
+                <motion.button
+                  key={option.value}
+                  onClick={() => handleGenderSelect(option.value as 'male' | 'female' | 'other')}
+                  className={`p-4 rounded-lg border-2 transition-all text-center font-medium ${
+                    personalData.gender === option.value
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border hover:border-muted-foreground'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <span className="text-2xl block mb-1">{option.emoji}</span>
+                  <span className="text-sm">{option.label}</span>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
 
-          {/* Campo adicional se "Outro" */}
-          {personalData.gender === 'other' && (
-            <motion.div
-              className="space-y-2"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-            >
-              <Label htmlFor="genderOther" className="text-base font-medium">
-                Especifique
-              </Label>
-              <Input
-                id="genderOther"
-                placeholder="Como você se identifica?"
-                value={personalData.genderOther || ''}
-                onChange={(e) => handleInputChange('genderOther', e.target.value)}
-                className="h-12 text-base"
-              />
-            </motion.div>
-          )}
+          {/* Info Box */}
+          <motion.div
+            className="mt-8 p-4 rounded-lg bg-primary/5 border border-primary/20"
+            variants={itemVariants}
+          >
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">💡 Dica:</span> Esses dados serão usados para calcular suas métricas personalizadas (IMC, TMB, TDEE).
+            </p>
+          </motion.div>
         </motion.div>
       </div>
 
       {/* Navigation Buttons */}
       <motion.div
-        className="flex gap-4 mt-8 pt-6 border-t border-border"
+        className="flex gap-3 mt-8 pt-6 border-t border-border"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.3 }}
       >
         <Button
           variant="outline"
           size="lg"
           onClick={prevStep}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Voltar
@@ -188,7 +209,7 @@ export default function Step1PersonalData() {
           size="lg"
           onClick={nextStep}
           disabled={!isValid}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           Próximo
           <ChevronRight className="w-4 h-4 ml-2" />

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAssessment } from '@/contexts/AssessmentContext';
-import { ChevronRight, ChevronLeft, X } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Step4Health() {
@@ -34,13 +34,33 @@ export default function Step4Health() {
     });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.06,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4 },
+    },
+  };
+
   const sections = [
-    { key: 'diseases', label: 'Doenças', placeholder: 'Ex: Diabetes, Hipertensão' },
-    { key: 'injuries', label: 'Lesões', placeholder: 'Ex: Lesão no ombro' },
-    { key: 'pains', label: 'Dores', placeholder: 'Ex: Dor nas costas' },
-    { key: 'medications', label: 'Medicamentos', placeholder: 'Ex: Omeprazol' },
-    { key: 'surgeries', label: 'Cirurgias', placeholder: 'Ex: Cirurgia de menisco' },
-    { key: 'restrictions', label: 'Restrições', placeholder: 'Ex: Não posso fazer agachamento' },
+    { key: 'diseases', label: 'Doenças', icon: '🏥', placeholder: 'Ex: Diabetes, Hipertensão' },
+    { key: 'injuries', label: 'Lesões', icon: '🩹', placeholder: 'Ex: Lesão no ombro' },
+    { key: 'pains', label: 'Dores', icon: '😣', placeholder: 'Ex: Dor nas costas' },
+    { key: 'medications', label: 'Medicamentos', icon: '💊', placeholder: 'Ex: Omeprazol' },
+    { key: 'surgeries', label: 'Cirurgias', icon: '🔪', placeholder: 'Ex: Cirurgia de menisco' },
+    { key: 'restrictions', label: 'Restrições', icon: '⛔', placeholder: 'Ex: Não posso fazer agachamento' },
   ];
 
   return (
@@ -52,65 +72,93 @@ export default function Step4Health() {
       transition={{ duration: 0.3 }}
     >
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Sua Saúde
-          </h1>
-          <span className="text-sm font-medium text-muted-foreground">
-            Etapa 4 de 8
-          </span>
+      <motion.div
+        className="mb-8"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+              Etapa 4 de 8
+            </p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+              Sua Saúde
+            </h1>
+          </div>
         </div>
-        <div className="w-full bg-border rounded-full h-1">
-          <div className="bg-primary h-1 rounded-full" style={{ width: '50%' }} />
+
+        {/* Progress Bar */}
+        <div className="w-full bg-border rounded-full h-1.5 overflow-hidden">
+          <motion.div
+            className="h-full bg-gradient-to-r from-primary to-blue-400"
+            initial={{ width: '0%' }}
+            animate={{ width: '50%' }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          />
         </div>
-      </div>
+      </motion.div>
 
       {/* Form Container */}
       <div className="flex-1 max-w-2xl mx-auto w-full overflow-y-auto">
         <motion.div
           className="space-y-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <p className="text-muted-foreground text-sm">
-            Adicione informações sobre sua saúde. Todos os campos são opcionais.
-          </p>
+          {/* Info Box */}
+          <motion.div
+            className="p-4 rounded-lg bg-primary/5 border border-primary/20"
+            variants={itemVariants}
+          >
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">ℹ️ Informação:</span> Esses dados ajudam a personalizar seu plano de treino de forma segura.
+            </p>
+          </motion.div>
 
+          {/* Health Sections */}
           {sections.map((section) => (
-            <div key={section.key} className="space-y-3">
-              <Label className="text-base font-medium">{section.label}</Label>
-              
-              {/* Input para adicionar novo item */}
+            <motion.div
+              key={section.key}
+              className="space-y-3"
+              variants={itemVariants}
+            >
+              <Label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <span>{section.icon}</span>
+                {section.label}
+              </Label>
+
+              {/* Input Row */}
               <div className="flex gap-2">
                 <Input
                   placeholder={section.placeholder}
-                  value={newItem[section.key] || ''}
+                  value={newItem[section.key]}
                   onChange={(e) => setNewItem({ ...newItem, [section.key]: e.target.value })}
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
                       handleAddItem(section.key);
                     }
                   }}
-                  className="h-10 text-base"
+                  className="h-11 text-base"
                 />
                 <Button
-                  size="sm"
+                  type="button"
+                  size="icon"
                   onClick={() => handleAddItem(section.key)}
-                  className="px-4"
+                  className="h-11 w-11 flex-shrink-0"
                 >
-                  +
+                  <Plus className="w-4 h-4" />
                 </Button>
               </div>
 
-              {/* Lista de itens adicionados */}
-              {(healthData[section.key as keyof typeof healthData] as string[])?.length > 0 && (
+              {/* Items List */}
+              {(healthData[section.key as keyof typeof healthData] as string[]).length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {(healthData[section.key as keyof typeof healthData] as string[]).map((item, index) => (
                     <motion.div
                       key={index}
-                      className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-sm"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-sm font-medium"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
@@ -126,23 +174,23 @@ export default function Step4Health() {
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </div>
 
       {/* Navigation Buttons */}
       <motion.div
-        className="flex gap-4 mt-8 pt-6 border-t border-border"
+        className="flex gap-3 mt-8 pt-6 border-t border-border"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.3 }}
       >
         <Button
           variant="outline"
           size="lg"
           onClick={prevStep}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
           Voltar
@@ -150,7 +198,7 @@ export default function Step4Health() {
         <Button
           size="lg"
           onClick={nextStep}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           Próximo
           <ChevronRight className="w-4 h-4 ml-2" />

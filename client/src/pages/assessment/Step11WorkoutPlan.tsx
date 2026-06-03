@@ -19,8 +19,8 @@ export default function Step11WorkoutPlan() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
+        staggerChildren: 0.08,
+        delayChildren: 0.15,
       },
     },
   };
@@ -30,7 +30,7 @@ export default function Step11WorkoutPlan() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6 },
+      transition: { duration: 0.5 },
     },
   };
 
@@ -45,13 +45,17 @@ export default function Step11WorkoutPlan() {
       {/* Header */}
       <motion.div
         className="mb-8"
-        variants={itemVariants}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
       >
+        <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
+          Seu Plano Personalizado
+        </p>
         <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
-          Seu Plano de Treino
+          Plano de Treino
         </h1>
         <p className="text-muted-foreground">
-          Treino personalizado baseado em seu perfil e objetivos
+          Treino adaptado ao seu perfil, objetivos e disponibilidade
         </p>
       </motion.div>
 
@@ -67,8 +71,8 @@ export default function Step11WorkoutPlan() {
           className="mb-8 p-4 rounded-lg bg-primary/10 border border-primary/20"
           variants={itemVariants}
         >
-          <p className="text-foreground">
-            <span className="font-semibold">Dica:</span> Comece com pesos leves para aprender a técnica correta. Aumente a carga progressivamente a cada semana.
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">💡 Dica:</span> Comece com pesos leves para aprender a técnica. Aumente progressivamente a cada semana.
           </p>
         </motion.div>
 
@@ -89,24 +93,26 @@ export default function Step11WorkoutPlan() {
                 <CollapsibleTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-between h-auto p-4 hover:bg-muted"
+                    className="w-full justify-between h-auto p-4 hover:bg-muted/50"
                   >
                     <div className="text-left">
                       <p className="font-semibold text-foreground">{day.day}</p>
-                      <p className="text-sm text-muted-foreground">{day.focus}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{day.focus}</p>
                     </div>
                     <ChevronDown
-                      className={`w-5 h-5 transition-transform ${
+                      className={`w-5 h-5 transition-transform flex-shrink-0 ${
                         expandedDay === dayIndex ? 'rotate-180' : ''
                       }`}
                     />
                   </Button>
                 </CollapsibleTrigger>
 
-                <CollapsibleContent className="mt-4 space-y-4">
+                <CollapsibleContent className="mt-4 space-y-4 ml-4">
                   {/* Warmup */}
                   <Card className="p-4 bg-blue-500/10 border-blue-500/20">
-                    <p className="text-sm font-semibold text-blue-500 mb-1">🔥 Aquecimento</p>
+                    <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-2">
+                      🔥 Aquecimento
+                    </p>
                     <p className="text-sm text-foreground">{day.warmup}</p>
                   </Card>
 
@@ -118,28 +124,28 @@ export default function Step11WorkoutPlan() {
                         className="p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: exIndex * 0.1 }}
+                        transition={{ delay: exIndex * 0.08 }}
                       >
-                        <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-start justify-between mb-3">
                           <h4 className="font-semibold text-foreground">
                             {exIndex + 1}. {exercise.name}
                           </h4>
                         </div>
                         <div className="grid grid-cols-3 gap-3 mb-3 text-sm">
-                          <div>
-                            <p className="text-muted-foreground text-xs">Séries</p>
-                            <p className="font-semibold text-primary">{exercise.sets}</p>
+                          <div className="p-2 rounded bg-muted/50">
+                            <p className="text-xs text-muted-foreground font-medium">Séries</p>
+                            <p className="font-bold text-primary">{exercise.sets}</p>
                           </div>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Repetições</p>
-                            <p className="font-semibold text-primary">{exercise.reps}</p>
+                          <div className="p-2 rounded bg-muted/50">
+                            <p className="text-xs text-muted-foreground font-medium">Reps</p>
+                            <p className="font-bold text-primary">{exercise.reps}</p>
                           </div>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Descanso</p>
-                            <p className="font-semibold text-primary">{exercise.rest}</p>
+                          <div className="p-2 rounded bg-muted/50">
+                            <p className="text-xs text-muted-foreground font-medium">Descanso</p>
+                            <p className="font-bold text-primary">{exercise.rest}</p>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground italic">
+                        <p className="text-xs text-muted-foreground italic">
                           💡 {exercise.notes}
                         </p>
                       </motion.div>
@@ -148,7 +154,9 @@ export default function Step11WorkoutPlan() {
 
                   {/* Cooldown */}
                   <Card className="p-4 bg-blue-500/10 border-blue-500/20">
-                    <p className="text-sm font-semibold text-blue-500 mb-1">❄️ Resfriamento</p>
+                    <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-2">
+                      ❄️ Resfriamento
+                    </p>
                     <p className="text-sm text-foreground">{day.cooldown}</p>
                   </Card>
                 </CollapsibleContent>
@@ -165,23 +173,23 @@ export default function Step11WorkoutPlan() {
           <h3 className="font-semibold text-foreground mb-4">📋 Pontos Importantes</h3>
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li className="flex gap-3">
-              <span className="text-primary font-bold">•</span>
-              <span>Sempre respeite o tempo de descanso entre séries</span>
+              <span className="text-primary font-bold flex-shrink-0">•</span>
+              <span>Respeite o tempo de descanso entre séries para recuperação</span>
             </li>
             <li className="flex gap-3">
-              <span className="text-primary font-bold">•</span>
+              <span className="text-primary font-bold flex-shrink-0">•</span>
               <span>Mantenha a forma correta em todos os exercícios</span>
             </li>
             <li className="flex gap-3">
-              <span className="text-primary font-bold">•</span>
-              <span>Aumente a carga quando conseguir fazer todas as repetições com facilidade</span>
+              <span className="text-primary font-bold flex-shrink-0">•</span>
+              <span>Aumente a carga quando conseguir fazer todas as reps com facilidade</span>
             </li>
             <li className="flex gap-3">
-              <span className="text-primary font-bold">•</span>
+              <span className="text-primary font-bold flex-shrink-0">•</span>
               <span>Descanse adequadamente entre os dias de treino</span>
             </li>
             <li className="flex gap-3">
-              <span className="text-primary font-bold">•</span>
+              <span className="text-primary font-bold flex-shrink-0">•</span>
               <span>Mantenha uma alimentação adequada ao seu objetivo</span>
             </li>
           </ul>
@@ -190,7 +198,7 @@ export default function Step11WorkoutPlan() {
 
       {/* Bottom Actions */}
       <motion.div
-        className="flex flex-col sm:flex-row gap-4 mt-8 pt-6 border-t border-border"
+        className="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-border"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
@@ -198,16 +206,16 @@ export default function Step11WorkoutPlan() {
         <Button
           variant="outline"
           size="lg"
-          className="flex-1 h-12"
+          className="flex-1 h-11"
           disabled
         >
           <Download className="w-4 h-4 mr-2" />
-          Exportar PDF
+          Exportar
         </Button>
         <Button
           variant="outline"
           size="lg"
-          className="flex-1 h-12"
+          className="flex-1 h-11"
           disabled
         >
           <Share2 className="w-4 h-4 mr-2" />
@@ -216,7 +224,7 @@ export default function Step11WorkoutPlan() {
         <Button
           size="lg"
           onClick={nextStep}
-          className="flex-1 h-12"
+          className="flex-1 h-11"
         >
           Próximo
           <ChevronRight className="w-4 h-4 ml-2" />
