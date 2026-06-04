@@ -68,6 +68,12 @@ export interface AssessmentResult {
     bmr: number;
     tdee: number;
     somatotype: string;
+    activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+    macros?: {
+      protein: number;
+      carbs: number;
+      fats: number;
+    };
   };
   diagnosis: {
     summary: string;

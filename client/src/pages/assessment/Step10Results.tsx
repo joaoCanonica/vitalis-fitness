@@ -4,6 +4,12 @@ import { Card } from '@/components/ui/card';
 import { useAssessment } from '@/contexts/AssessmentContext';
 import { ChevronRight, Download, Share2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { IMCChart } from '@/components/charts/IMCChart';
+import { MacrosChart } from '@/components/charts/MacrosChart';
+import { CaloriesChart } from '@/components/charts/CaloriesChart';
+import { FitnessProfileChart } from '@/components/charts/FitnessProfileChart';
+import { HabitsAnalysisChart } from '@/components/charts/HabitsAnalysisChart';
+import { HealthRiskChart } from '@/components/charts/HealthRiskChart';
 
 export default function Step10Results() {
   const { result, personalData, nextStep } = useAssessment();
@@ -161,6 +167,77 @@ export default function Step10Results() {
             <p className="text-xs text-muted-foreground">
               ml
             </p>
+          </motion.div>
+        </motion.div>
+
+        {/* Charts Section */}
+        <motion.div
+          className="mb-8 space-y-6"
+          variants={containerVariants}
+        >
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Seu Índice de Massa Corporal</h3>
+            <Card className="p-6">
+              <IMCChart imc={result.profile.bmi} category={result.profile.bmiCategory} />
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Distribuição de Calorias</h3>
+            <Card className="p-6">
+              <CaloriesChart
+                tdee={result.profile.tdee}
+                bmr={result.profile.bmr}
+                activityLevel={result.profile.activityLevel || 'moderate'}
+              />
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Macronutrientes Recomendados</h3>
+            <Card className="p-6">
+              <MacrosChart
+                protein={result.profile.macros?.protein || 100}
+                carbs={result.profile.macros?.carbs || 200}
+                fats={result.profile.macros?.fats || 60}
+              />
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Seu Perfil Fitness</h3>
+            <Card className="p-6">
+              <FitnessProfileChart
+                strength={75}
+                endurance={65}
+                flexibility={60}
+                balance={70}
+                recovery={80}
+              />
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Analise de Habitos</h3>
+            <Card className="p-6">
+              <HabitsAnalysisChart
+                sleepScore={result.profile.bmi < 25 ? 85 : 65}
+                hydrationScore={80}
+                stressScore={result.profile.bmi < 25 ? 70 : 50}
+                nutritionScore={75}
+              />
+            </Card>
+          </motion.div>
+
+          <motion.div variants={itemVariants}>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Avaliacao de Risco de Saude</h3>
+            <Card className="p-6">
+              <HealthRiskChart
+                cardiovascularRisk={result.profile.bmi < 25 ? 25 : 55}
+                metabolicRisk={result.profile.bmi < 25 ? 30 : 60}
+                musculoskeletalRisk={40}
+              />
+            </Card>
           </motion.div>
         </motion.div>
 
