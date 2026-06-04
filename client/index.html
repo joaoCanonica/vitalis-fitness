@@ -1,26 +1,725 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitalis - Avaliação Fitness Completa</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header com Toggle de Tema -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">❤️</span>
+                    <h1>Vitalis</h1>
+                </div>
+                <button id="themeToggle" class="theme-toggle" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </header>
 
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>{{project_title}}</title>    
-    <!-- THIS IS THE START OF A COMMENT BLOCK, BLOCK TO BE DELETED: Google Fonts here, example:
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    THIS IS THE END OF A COMMENT BLOCK, BLOCK TO BE DELETED -->
-  </head>
+        <!-- Landing Page -->
+        <section id="landing" class="step-section active">
+            <div class="container">
+                <div class="landing-content">
+                    <div class="landing-badge">✨ Avaliação Fitness em 2 Minutos</div>
+                    <h2 class="landing-title">Seu Corpo. <span class="highlight">Sua Máquina.</span></h2>
+                    <p class="landing-description">
+                        Descubra seu perfil fitness completo, receba um diagnóstico inteligente e 
+                        um plano de treino personalizado. Tudo processado localmente, nada é salvo.
+                    </p>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script
-      defer
-      src="%VITE_ANALYTICS_ENDPOINT%/umami"
-      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
-  </body>
+                    <div class="landing-features">
+                        <div class="feature">
+                            <span class="feature-icon">🔒</span>
+                            <span class="feature-text">100% Privado</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">📊</span>
+                            <span class="feature-text">Sem Cadastro</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">⚡</span>
+                            <span class="feature-text">Sem Paywalls</span>
+                        </div>
+                    </div>
 
+                    <button class="btn btn-primary btn-lg" onclick="app.nextStep()">
+                        Começar Avaliação
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 1: Dados Básicos -->
+        <section id="step1" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 1 de 8</span>
+                        <h2>Dados Básicos</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 12.5%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="fullName">Nome Completo</label>
+                        <input type="text" id="fullName" class="form-input" placeholder="Seu nome">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="age">Idade</label>
+                            <input type="number" id="age" class="form-input" placeholder="25" min="15" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="height">Altura (cm)</label>
+                            <input type="number" id="height" class="form-input" placeholder="175" min="100" max="250">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="weight">Peso (kg)</label>
+                            <input type="number" id="weight" class="form-input" placeholder="75" min="30" max="300" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">Gênero</label>
+                            <select id="gender" class="form-input">
+                                <option value="">Selecione</option>
+                                <option value="male">Masculino</option>
+                                <option value="female">Feminino</option>
+                                <option value="other">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="genderOtherGroup" class="form-group" style="display: none;">
+                        <label for="genderOther">Especifique</label>
+                        <input type="text" id="genderOther" class="form-input" placeholder="Sua resposta">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 2: Objetivos -->
+        <section id="step2" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 2 de 8</span>
+                        <h2>Seus Objetivos</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 25%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Objetivo Principal</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="mainGoal" data-value="weight_loss">
+                                📉 Perder Peso
+                            </button>
+                            <button class="btn-option" data-field="mainGoal" data-value="muscle_gain">
+                                💪 Ganhar Massa
+                            </button>
+                            <button class="btn-option" data-field="mainGoal" data-value="endurance">
+                                🏃 Resistência
+                            </button>
+                            <button class="btn-option" data-field="mainGoal" data-value="general_fitness">
+                                ⚡ Fitness Geral
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="desiredWeight">Peso Desejado (kg)</label>
+                            <input type="number" id="desiredWeight" class="form-input" placeholder="70" min="30" max="300" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="timeframe">Prazo</label>
+                            <select id="timeframe" class="form-input">
+                                <option value="">Selecione</option>
+                                <option value="1_month">1 Mês</option>
+                                <option value="3_months">3 Meses</option>
+                                <option value="6_months">6 Meses</option>
+                                <option value="1_year">1 Ano</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motivation">O que te motiva?</label>
+                        <textarea id="motivation" class="form-input" rows="3" placeholder="Descreva sua motivação..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 3: Histórico de Treino -->
+        <section id="step3" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 3 de 8</span>
+                        <h2>Histórico de Treino</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 37.5%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Experiência com Treino</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="experience" data-value="beginner">
+                                🌱 Iniciante
+                            </button>
+                            <button class="btn-option" data-field="experience" data-value="intermediate">
+                                📈 Intermediário
+                            </button>
+                            <button class="btn-option" data-field="experience" data-value="advanced">
+                                🏆 Avançado
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="trainingDays">Quantos dias por semana você treina?</label>
+                        <input type="number" id="trainingDays" class="form-input" placeholder="3" min="0" max="7">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="hasPersonalTrainer" class="form-checkbox">
+                            <span>Tenho personal trainer</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="hasNutritionist" class="form-checkbox">
+                            <span>Tenho nutricionista</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 4: Saúde -->
+        <section id="step4" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 4 de 8</span>
+                        <h2>Sua Saúde</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="diseases">Doenças (ex: Diabetes, Hipertensão)</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="diseases" class="form-input" placeholder="Digite e pressione Enter">
+                            <button class="btn btn-sm" onclick="app.addTag('diseases')">Adicionar</button>
+                        </div>
+                        <div id="diseasesTags" class="tags-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="injuries">Lesões</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="injuries" class="form-input" placeholder="Digite e pressione Enter">
+                            <button class="btn btn-sm" onclick="app.addTag('injuries')">Adicionar</button>
+                        </div>
+                        <div id="injuriesTags" class="tags-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pains">Dores Crônicas</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="pains" class="form-input" placeholder="Digite e pressione Enter">
+                            <button class="btn btn-sm" onclick="app.addTag('pains')">Adicionar</button>
+                        </div>
+                        <div id="painsTags" class="tags-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="medications">Medicamentos</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="medications" class="form-input" placeholder="Digite e pressione Enter">
+                            <button class="btn btn-sm" onclick="app.addTag('medications')">Adicionar</button>
+                        </div>
+                        <div id="medicationsTags" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 5: Hábitos -->
+        <section id="step5" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 5 de 8</span>
+                        <h2>Seus Hábitos</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 62.5%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Qualidade do Sono</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="sleepQuality" data-value="poor">😴 Ruim</button>
+                            <button class="btn-option" data-field="sleepQuality" data-value="fair">😐 Razoável</button>
+                            <button class="btn-option" data-field="sleepQuality" data-value="good">😊 Boa</button>
+                            <button class="btn-option" data-field="sleepQuality" data-value="excellent">✨ Excelente</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sleepHours">Horas de sono por noite</label>
+                        <input type="number" id="sleepHours" class="form-input" placeholder="7" min="3" max="12" step="0.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Consumo de Álcool</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="alcoholConsumption" data-value="never">🚫 Nunca</button>
+                            <button class="btn-option" data-field="alcoholConsumption" data-value="rarely">🍷 Raramente</button>
+                            <button class="btn-option" data-field="alcoholConsumption" data-value="sometimes">🍺 Às vezes</button>
+                            <button class="btn-option" data-field="alcoholConsumption" data-value="frequently">🍻 Frequentemente</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tabagismo</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="smoking" data-value="never">🚫 Nunca</button>
+                            <button class="btn-option" data-field="smoking" data-value="quit">✅ Parei</button>
+                            <button class="btn-option" data-field="smoking" data-value="occasional">🚬 Ocasional</button>
+                            <button class="btn-option" data-field="smoking" data-value="daily">🚬🚬 Diário</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nível de Estresse</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="stressLevel" data-value="low">😌 Baixo</button>
+                            <button class="btn-option" data-field="stressLevel" data-value="moderate">😐 Moderado</button>
+                            <button class="btn-option" data-field="stressLevel" data-value="high">😰 Alto</button>
+                            <button class="btn-option" data-field="stressLevel" data-value="very_high">😱 Muito Alto</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="waterIntake">Litros de água por dia</label>
+                        <input type="number" id="waterIntake" class="form-input" placeholder="2" min="0.5" max="5" step="0.25">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 6: Alimentação -->
+        <section id="step6" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 6 de 8</span>
+                        <h2>Sua Alimentação</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Consumo de Frutas</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="fruitsConsumption" data-value="never">Nunca</button>
+                            <button class="btn-option" data-field="fruitsConsumption" data-value="rarely">Raramente</button>
+                            <button class="btn-option" data-field="fruitsConsumption" data-value="sometimes">Às vezes</button>
+                            <button class="btn-option" data-field="fruitsConsumption" data-value="daily">Diário</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Consumo de Verduras</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="vegetablesConsumption" data-value="never">Nunca</button>
+                            <button class="btn-option" data-field="vegetablesConsumption" data-value="rarely">Raramente</button>
+                            <button class="btn-option" data-field="vegetablesConsumption" data-value="sometimes">Às vezes</button>
+                            <button class="btn-option" data-field="vegetablesConsumption" data-value="daily">Diário</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Consumo de Refrigerante</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="sodaConsumption" data-value="never">Nunca</button>
+                            <button class="btn-option" data-field="sodaConsumption" data-value="rarely">Raramente</button>
+                            <button class="btn-option" data-field="sodaConsumption" data-value="sometimes">Às vezes</button>
+                            <button class="btn-option" data-field="sodaConsumption" data-value="daily">Diário</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Consumo de Doces</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="sweetsConsumption" data-value="never">Nunca</button>
+                            <button class="btn-option" data-field="sweetsConsumption" data-value="rarely">Raramente</button>
+                            <button class="btn-option" data-field="sweetsConsumption" data-value="sometimes">Às vezes</button>
+                            <button class="btn-option" data-field="sweetsConsumption" data-value="daily">Diário</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="allergies">Alergias Alimentares</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="allergies" class="form-input" placeholder="Digite e pressione Enter">
+                            <button class="btn btn-sm" onclick="app.addTag('allergies')">Adicionar</button>
+                        </div>
+                        <div id="allergiesTags" class="tags-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="intolerances">Intolerâncias</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="intolerances" class="form-input" placeholder="Digite e pressione Enter">
+                            <button class="btn btn-sm" onclick="app.addTag('intolerances')">Adicionar</button>
+                        </div>
+                        <div id="intolerancesTags" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 7: Disponibilidade -->
+        <section id="step7" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 7 de 8</span>
+                        <h2>Sua Disponibilidade</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 87.5%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-group">
+                        <label>Dias Disponíveis para Treino</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="monday" class="form-checkbox">
+                                <span>Segunda</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="tuesday" class="form-checkbox">
+                                <span>Terça</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="wednesday" class="form-checkbox">
+                                <span>Quarta</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="thursday" class="form-checkbox">
+                                <span>Quinta</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="friday" class="form-checkbox">
+                                <span>Sexta</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="saturday" class="form-checkbox">
+                                <span>Sábado</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="availableDays" value="sunday" class="form-checkbox">
+                                <span>Domingo</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tempo Disponível por Sessão</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="timeAvailable" data-value="30_min">30 min</button>
+                            <button class="btn-option" data-field="timeAvailable" data-value="45_min">45 min</button>
+                            <button class="btn-option" data-field="timeAvailable" data-value="60_min">60 min</button>
+                            <button class="btn-option" data-field="timeAvailable" data-value="90_min">90 min</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Local de Treino</label>
+                        <div class="button-group">
+                            <button class="btn-option" data-field="trainingLocation" data-value="home">🏠 Casa</button>
+                            <button class="btn-option" data-field="trainingLocation" data-value="gym">🏋️ Academia</button>
+                            <button class="btn-option" data-field="trainingLocation" data-value="outdoor">🌳 Ar Livre</button>
+                            <button class="btn-option" data-field="trainingLocation" data-value="mixed">🔄 Misto</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="equipment">Equipamentos Disponíveis</label>
+                        <div class="tag-input-group">
+                            <input type="text" id="equipment" class="form-input" placeholder="Ex: Halteres, Barra">
+                            <button class="btn btn-sm" onclick="app.addTag('equipment')">Adicionar</button>
+                        </div>
+                        <div id="equipmentTags" class="tags-container"></div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 8: Resumo -->
+        <section id="step8" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <span class="step-number">Etapa 8 de 8</span>
+                        <h2>Confirme seus Dados</h2>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="summary-card">
+                        <h3>Resumo da Avaliação</h3>
+                        <div id="summaryContent" class="summary-content"></div>
+                    </div>
+
+                    <div class="info-box">
+                        <p>✓ Todos os dados serão processados localmente</p>
+                        <p>✓ Nenhuma informação será salva ou compartilhada</p>
+                        <p>✓ Você receberá um plano personalizado</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Processar Avaliação</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 9: Processamento -->
+        <section id="step9" class="step-section">
+            <div class="container">
+                <div class="processing-container">
+                    <div class="processing-animation">
+                        <div class="spinner"></div>
+                    </div>
+                    <h2>Processando sua Avaliação</h2>
+                    <div class="processing-messages">
+                        <p id="processingMessage">Analisando dados...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 10: Resultados -->
+        <section id="step10" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <h2 id="resultTitle">Olá, <span id="resultName">Usuário</span></h2>
+                        <p>Aqui está sua avaliação fitness completa</p>
+                    </div>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">IMC</div>
+                        <div class="result-value" id="resultIMC">--</div>
+                        <div class="result-category" id="resultIMCCategory">--</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">TMB</div>
+                        <div class="result-value" id="resultTMB">--</div>
+                        <div class="result-category">kcal/dia</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">TDEE</div>
+                        <div class="result-value" id="resultTDEE">--</div>
+                        <div class="result-category">kcal/dia</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Água Diária</div>
+                        <div class="result-value" id="resultWater">--</div>
+                        <div class="result-category">ml</div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <h3>Seu Perfil Fitness</h3>
+                    <div class="profile-card">
+                        <div class="profile-classification" id="profileClassification">--</div>
+                        <div class="profile-description" id="profileDescription">--</div>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Análise Detalhada</h3>
+                    
+                    <div class="analysis-card">
+                        <h4>✓ Pontos Fortes</h4>
+                        <ul id="strengthsList" class="analysis-list"></ul>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h4>⚠ Pontos de Atenção</h4>
+                        <ul id="focusAreasList" class="analysis-list"></ul>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h4>💡 Recomendações</h4>
+                        <ul id="recommendationsList" class="analysis-list"></ul>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.nextStep()">Ver Treino</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Próximo</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 11: Plano de Treino -->
+        <section id="step11" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <h2>Seu Plano de Treino</h2>
+                        <p>Treino adaptado ao seu perfil e disponibilidade</p>
+                    </div>
+                </div>
+
+                <div id="workoutPlanContent" class="workout-plan">
+                    <!-- Preenchido dinamicamente -->
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Exportar PDF</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 12: Exportação PDF -->
+        <section id="step12" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <h2>Exportar Relatório</h2>
+                        <p>Baixe seu relatório completo em PDF</p>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <button class="btn btn-primary btn-lg" onclick="app.exportPDF()">
+                        📥 Baixar PDF Completo
+                    </button>
+                    <p class="export-description">
+                        Seu relatório inclui: Diagnóstico, Métricas, Plano de Treino e Recomendações
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.nextStep()">Compartilhar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 13: Compartilhamento -->
+        <section id="step13" class="step-section">
+            <div class="container">
+                <div class="step-header">
+                    <div class="step-info">
+                        <h2>Compartilhe seu Resultado</h2>
+                        <p>Envie para seu personal trainer ou amigos</p>
+                    </div>
+                </div>
+
+                <div class="share-section">
+                    <button class="btn btn-primary btn-lg" onclick="app.shareWhatsApp()">
+                        💬 Compartilhar no WhatsApp
+                    </button>
+                    <p class="share-description">
+                        Envie um resumo do seu resultado para o WhatsApp
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-outline" onclick="app.prevStep()">Voltar</button>
+                    <button class="btn btn-primary" onclick="app.restart()">Fazer Nova Avaliação</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/calculations.js"></script>
+    <script src="js/training.js"></script>
+    <script src="js/pdf.js"></script>
+    <script src="js/app.js"></script>
+</body>
 </html>
