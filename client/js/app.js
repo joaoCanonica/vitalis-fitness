@@ -1,582 +1,377 @@
-/**
- * VITALIS - Main Application
- * Lógica principal, navegação, estado e tema
- */
+/* VITALIS — app.js (mobile-first rewrite) */
 
-const app = {
-  // Estado global
-  currentStep: 0,
-  totalSteps: 13,
-  assessmentData: {
-    personalData: {},
-    goalData: {},
-    trainingHistoryData: {},
-    healthData: { diseases: [], injuries: [], pains: [], medications: [], surgeries: [], restrictions: [] },
-    habitsData: {},
-    nutritionData: { allergies: [], intolerances: [], diets: [] },
-    availabilityData: { availableDays: [], equipment: [] }
-  },
-  result: null,
-  theme: 'light',
+// ── THEME ───────────────────────────────────────────────────
+const root = document.documentElement;
+function setTheme(t) {
+  root.setAttribute('data-theme', t);
+  document.getElementById('themeIco').textContent = t === 'dark' ? '☀️' : '🌙';
+  const mc = document.getElementById('metaThemeColor');
+  if (mc) mc.content = t === 'dark' ? '#0a0a0f' : '#ffffff';
+  try { localStorage.setItem('vt', t); } catch(e) {}
+}
+function toggleTheme() { setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+(function() {
+  try {
+    const s = localStorage.getItem('vt');
+    if (s) { setTheme(s); return; }
+    setTheme(window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+  } catch(e) { setTheme('dark'); }
+})();
 
-  /**
-   * Inicializa a aplicação
-   */
-  init() {
-    this.loadTheme();
-    this.attachEventListeners();
-    this.setupGenderOtherToggle();
-    this.showStep(0);
-  },
+// ── SCREENS ─────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  const el = document.getElementById(id);
+  if (el) { el.classList.add('on'); window.scrollTo({ top: 0, behavior: 'instant' }); }
+}
 
-  /**
-   * Carrega tema salvo
-   */
-  loadTheme() {
-    const savedTheme = localStorage.getItem('vitalis-theme') || 'light';
-    this.theme = savedTheme;
-    this.applyTheme();
-  },
-
-  /**
-   * Aplica tema
-   */
-  applyTheme() {
-    document.documentElement.setAttribute('data-theme', this.theme);
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.textContent = this.theme === 'light' ? '🌙' : '☀️';
-    }
-  },
-
-  /**
-   * Alterna tema
-   */
-  toggleTheme() {
-    this.theme = this.theme === 'light' ? 'dark' : 'light';
-    localStorage.setItem('vitalis-theme', this.theme);
-    this.applyTheme();
-  },
-
-  /**
-   * Anexa event listeners
-   */
-  attachEventListeners() {
-    // Toggle de tema
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => this.toggleTheme());
-    }
-
-    // Botões de opção
-    document.querySelectorAll('.btn-option').forEach(btn => {
-      btn.addEventListener('click', (e) => this.selectOption(e.target));
+// ── OPTION BUTTONS ───────────────────────────────────────────
+document.querySelectorAll('.og, .oi-wrap').forEach(g => {
+  g.querySelectorAll('.ob').forEach(b => {
+    b.addEventListener('click', function() {
+      g.querySelectorAll('.ob').forEach(x => x.classList.remove('sel'));
+      this.classList.add('sel');
     });
-
-    // Checkboxes de dias
-    document.querySelectorAll('input[name="availableDays"]').forEach(checkbox => {
-      checkbox.addEventListener('change', (e) => this.updateAvailableDays());
-    });
-
-    // Enter em inputs de tags
-    document.querySelectorAll('.tag-input-group .form-input').forEach(input => {
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          const fieldName = input.id;
-          this.addTag(fieldName);
-        }
-      });
-    });
-  },
-
-  /**
-   * Configura toggle de gênero "outro"
-   */
-  setupGenderOtherToggle() {
-    const genderSelect = document.getElementById('gender');
-    const genderOtherGroup = document.getElementById('genderOtherGroup');
-
-    if (genderSelect) {
-      genderSelect.addEventListener('change', (e) => {
-        if (e.target.value === 'other') {
-          genderOtherGroup.style.display = 'block';
-        } else {
-          genderOtherGroup.style.display = 'none';
-        }
-      });
-    }
-  },
-
-  /**
-   * Seleciona opção de botão
-   */
-  selectOption(button) {
-    const fieldName = button.getAttribute('data-field');
-    const fieldValue = button.getAttribute('data-value');
-
-    // Remover seleção anterior
-    const group = button.parentElement;
-    group.querySelectorAll('.btn-option').forEach(btn => {
-      btn.classList.remove('active');
-    });
-
-    // Adicionar seleção atual
-    button.classList.add('active');
-
-    // Atualizar dados
-    this.updateAssessmentData(fieldName, fieldValue);
-  },
-
-  /**
-   * Atualiza dados da avaliação
-   */
-  updateAssessmentData(fieldName, fieldValue) {
-    // Mapear campo para seção correta
-    if (['fullName', 'age', 'height', 'weight', 'gender', 'genderOther'].includes(fieldName)) {
-      this.assessmentData.personalData[fieldName] = fieldValue;
-    } else if (['mainGoal', 'desiredWeight', 'timeframe', 'motivation'].includes(fieldName)) {
-      this.assessmentData.goalData[fieldName] = fieldValue;
-    } else if (['experience', 'trainingDays', 'hasPersonalTrainer', 'hasNutritionist'].includes(fieldName)) {
-      this.assessmentData.trainingHistoryData[fieldName] = fieldValue;
-    } else if (['sleepQuality', 'sleepHours', 'alcoholConsumption', 'smoking', 'stressLevel', 'waterIntake'].includes(fieldName)) {
-      this.assessmentData.habitsData[fieldName] = fieldValue;
-    } else if (['fruitsConsumption', 'vegetablesConsumption', 'sodaConsumption', 'sweetsConsumption'].includes(fieldName)) {
-      this.assessmentData.nutritionData[fieldName] = fieldValue;
-    } else if (['timeAvailable', 'trainingLocation'].includes(fieldName)) {
-      this.assessmentData.availabilityData[fieldName] = fieldValue;
-    }
-  },
-
-  /**
-   * Atualiza dias disponíveis
-   */
-  updateAvailableDays() {
-    const selected = [];
-    document.querySelectorAll('input[name="availableDays"]:checked').forEach(checkbox => {
-      selected.push(checkbox.value);
-    });
-    this.assessmentData.availabilityData.availableDays = selected;
-  },
-
-  /**
-   * Adiciona tag
-   */
-  addTag(fieldName) {
-    const input = document.getElementById(fieldName);
-    const value = input.value.trim();
-
-    if (!value) return;
-
-    // Mapear para campo correto
-    let arrayField = null;
-    if (fieldName === 'diseases') arrayField = 'diseases';
-    else if (fieldName === 'injuries') arrayField = 'injuries';
-    else if (fieldName === 'pains') arrayField = 'pains';
-    else if (fieldName === 'medications') arrayField = 'medications';
-    else if (fieldName === 'allergies') arrayField = 'allergies';
-    else if (fieldName === 'intolerances') arrayField = 'intolerances';
-    else if (fieldName === 'equipment') arrayField = 'equipment';
-
-    if (arrayField) {
-      if (arrayField === 'equipment') {
-        this.assessmentData.availabilityData[arrayField].push(value);
-      } else if (['diseases', 'injuries', 'pains', 'medications'].includes(arrayField)) {
-        this.assessmentData.healthData[arrayField].push(value);
-      } else {
-        this.assessmentData.nutritionData[arrayField].push(value);
-      }
-
-      input.value = '';
-      this.renderTags(fieldName);
-    }
-  },
-
-  /**
-   * Renderiza tags
-   */
-  renderTags(fieldName) {
-    const container = document.getElementById(fieldName + 'Tags');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    let tags = [];
-    if (fieldName === 'diseases') tags = this.assessmentData.healthData.diseases;
-    else if (fieldName === 'injuries') tags = this.assessmentData.healthData.injuries;
-    else if (fieldName === 'pains') tags = this.assessmentData.healthData.pains;
-    else if (fieldName === 'medications') tags = this.assessmentData.healthData.medications;
-    else if (fieldName === 'allergies') tags = this.assessmentData.nutritionData.allergies;
-    else if (fieldName === 'intolerances') tags = this.assessmentData.nutritionData.intolerances;
-    else if (fieldName === 'equipment') tags = this.assessmentData.availabilityData.equipment;
-
-    tags.forEach((tag, index) => {
-      const tagEl = document.createElement('div');
-      tagEl.className = 'tag';
-      tagEl.innerHTML = `
-        ${tag}
-        <span class="tag-remove" onclick="app.removeTag('${fieldName}', ${index})">✕</span>
-      `;
-      container.appendChild(tagEl);
-    });
-  },
-
-  /**
-   * Remove tag
-   */
-  removeTag(fieldName, index) {
-    if (fieldName === 'diseases') this.assessmentData.healthData.diseases.splice(index, 1);
-    else if (fieldName === 'injuries') this.assessmentData.healthData.injuries.splice(index, 1);
-    else if (fieldName === 'pains') this.assessmentData.healthData.pains.splice(index, 1);
-    else if (fieldName === 'medications') this.assessmentData.healthData.medications.splice(index, 1);
-    else if (fieldName === 'allergies') this.assessmentData.nutritionData.allergies.splice(index, 1);
-    else if (fieldName === 'intolerances') this.assessmentData.nutritionData.intolerances.splice(index, 1);
-    else if (fieldName === 'equipment') this.assessmentData.availabilityData.equipment.splice(index, 1);
-
-    this.renderTags(fieldName);
-  },
-
-  /**
-   * Coleta dados do formulário atual
-   */
-  collectFormData() {
-    // Step 1: Dados Básicos
-    if (this.currentStep === 1) {
-      this.assessmentData.personalData.fullName = document.getElementById('fullName').value;
-      this.assessmentData.personalData.age = parseInt(document.getElementById('age').value) || '';
-      this.assessmentData.personalData.height = parseInt(document.getElementById('height').value) || '';
-      this.assessmentData.personalData.weight = parseFloat(document.getElementById('weight').value) || '';
-      this.assessmentData.personalData.gender = document.getElementById('gender').value;
-      if (this.assessmentData.personalData.gender === 'other') {
-        this.assessmentData.personalData.genderOther = document.getElementById('genderOther').value;
-      }
-    }
-    // Step 2: Objetivos
-    else if (this.currentStep === 2) {
-      this.assessmentData.goalData.desiredWeight = parseFloat(document.getElementById('desiredWeight').value) || '';
-      this.assessmentData.goalData.motivation = document.getElementById('motivation').value;
-    }
-    // Step 3: Histórico
-    else if (this.currentStep === 3) {
-      this.assessmentData.trainingHistoryData.trainingDays = parseInt(document.getElementById('trainingDays').value) || '';
-      this.assessmentData.trainingHistoryData.hasPersonalTrainer = document.getElementById('hasPersonalTrainer').checked;
-      this.assessmentData.trainingHistoryData.hasNutritionist = document.getElementById('hasNutritionist').checked;
-    }
-    // Step 5: Hábitos
-    else if (this.currentStep === 5) {
-      this.assessmentData.habitsData.sleepHours = parseFloat(document.getElementById('sleepHours').value) || '';
-      this.assessmentData.habitsData.waterIntake = parseFloat(document.getElementById('waterIntake').value) || '';
-    }
-  },
-
-  /**
-   * Valida dados do step atual
-   */
-  validateStep() {
-    if (this.currentStep === 1) {
-      const { fullName, age, height, weight, gender } = this.assessmentData.personalData;
-      if (!fullName || !age || !height || !weight || !gender) {
-        alert('Por favor, preencha todos os campos obrigatórios');
-        return false;
-      }
-    }
-    return true;
-  },
-
-  /**
-   * Próximo step
-   */
-  nextStep() {
-    this.collectFormData();
-
-    if (!this.validateStep()) return;
-
-    if (this.currentStep === 8) {
-      // Processar avaliação
-      this.processAssessment();
-    } else if (this.currentStep < this.totalSteps - 1) {
-      this.currentStep++;
-      this.showStep(this.currentStep);
-    }
-  },
-
-  /**
-   * Step anterior
-   */
-  prevStep() {
-    if (this.currentStep > 0) {
-      this.currentStep--;
-      this.showStep(this.currentStep);
-    }
-  },
-
-  /**
-   * Mostra step específico
-   */
-  showStep(stepNumber) {
-    // Ocultar todos os steps
-    document.querySelectorAll('.step-section').forEach(section => {
-      section.classList.remove('active');
-    });
-
-    // Mostrar step atual
-    const stepId = stepNumber === 0 ? 'landing' : 'step' + stepNumber;
-    const stepElement = document.getElementById(stepId);
-    if (stepElement) {
-      stepElement.classList.add('active');
-    }
-
-    // Scroll para o topo
-    window.scrollTo(0, 0);
-
-    // Renderizar resumo no step 8
-    if (stepNumber === 8) {
-      this.renderSummary();
-    }
-  },
-
-  /**
-   * Renderiza resumo
-   */
-  renderSummary() {
-    const summaryContent = document.getElementById('summaryContent');
-    if (!summaryContent) return;
-
-    const items = [
-      ['Nome', this.assessmentData.personalData.fullName],
-      ['Idade', this.assessmentData.personalData.age + ' anos'],
-      ['Altura', this.assessmentData.personalData.height + ' cm'],
-      ['Peso', this.assessmentData.personalData.weight + ' kg'],
-      ['Objetivo', this.assessmentData.goalData.mainGoal],
-      ['Dias de Treino', this.assessmentData.trainingHistoryData.trainingDays],
-    ];
-
-    summaryContent.innerHTML = items.map(([label, value]) => `
-      <div class="summary-item">
-        <span class="summary-label">${label}</span>
-        <span class="summary-value">${value || '--'}</span>
-      </div>
-    `).join('');
-  },
-
-  /**
-   * Processa avaliação
-   */
-  async processAssessment() {
-    this.currentStep = 9;
-    this.showStep(9);
-
-    // Simular processamento
-    const messages = [
-      'Analisando composição corporal...',
-      'Calculando métricas...',
-      'Identificando perfil fitness...',
-      'Montando plano inicial...',
-      'Preparando relatório...'
-    ];
-
-    for (let i = 0; i < messages.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 600));
-      document.getElementById('processingMessage').textContent = messages[i];
-    }
-
-    // Calcular resultados
-    this.calculateResults();
-
-    // Mostrar resultados
-    this.currentStep = 10;
-    this.showStep(10);
-    this.displayResults();
-  },
-
-  /**
-   * Calcula resultados
-   */
-  calculateResults() {
-    const { personalData, goalData, trainingHistoryData, healthData, habitsData, nutritionData, availabilityData } = this.assessmentData;
-
-    // Cálculos básicos
-    const bmiData = calculations.calculateBMI(personalData.weight, personalData.height);
-    const bmr = calculations.calculateBMR(personalData.weight, personalData.height, personalData.age, personalData.gender);
-    const trainingDays = parseInt(trainingHistoryData.trainingDays) || 3;
-    const activityLevel = trainingDays <= 2 ? 'light' : trainingDays <= 4 ? 'moderate' : 'active';
-    const tdee = calculations.calculateTDEE(bmr, activityLevel);
-    const macros = calculations.calculateMacros(tdee, goalData.mainGoal);
-    const waterIntake = calculations.calculateWaterIntake(personalData.weight, activityLevel);
-    const somatotype = calculations.determineSomatotype(bmiData.bmi, personalData.gender);
-    const classification = calculations.getProfileClassification(bmiData.bmi, trainingHistoryData.experience, trainingDays);
-
-    // Gerar diagnóstico
-    const strengths = calculations.getStrengths(this.assessmentData);
-    const focusAreas = calculations.getFocusAreas(this.assessmentData, bmiData.bmi);
-    const recommendations = calculations.getRecommendations(this.assessmentData, bmiData.bmi);
-
-    // Gerar plano de treino
-    const workoutPlan = training.generateWorkoutPlan(this.assessmentData);
-
-    // Armazenar resultado
-    this.result = {
-      profile: {
-        classification: classification,
-        bmi: bmiData.bmi,
-        bmiCategory: bmiData.category,
-        bmr: bmr,
-        tdee: tdee,
-        somatotype: somatotype,
-        activityLevel: activityLevel,
-        macros: macros
-      },
-      diagnosis: {
-        summary: `Você é um ${classification} com IMC de ${bmiData.bmi}`,
-        strengths: strengths,
-        focusAreas: focusAreas,
-        recommendations: recommendations
-      },
-      workoutPlan: workoutPlan,
-      waterIntakeRecommendation: waterIntake,
-      identifiedGoals: [goalData.mainGoal]
-    };
-  },
-
-  /**
-   * Exibe resultados
-   */
-  displayResults() {
-    const result = this.result;
-    const personalData = this.assessmentData.personalData;
-
-    // Atualizar nome
-    document.getElementById('resultName').textContent = personalData.fullName || 'Usuário';
-
-    // Atualizar métricas
-    document.getElementById('resultIMC').textContent = result.profile.bmi;
-    document.getElementById('resultIMCCategory').textContent = result.profile.bmiCategory;
-    document.getElementById('resultTMB').textContent = result.profile.bmr;
-    document.getElementById('resultTDEE').textContent = result.profile.tdee;
-    document.getElementById('resultWater').textContent = result.waterIntakeRecommendation;
-
-    // Atualizar perfil
-    document.getElementById('profileClassification').textContent = result.profile.classification;
-    document.getElementById('profileDescription').textContent = result.diagnosis.summary;
-
-    // Atualizar análise
-    document.getElementById('strengthsList').innerHTML = result.diagnosis.strengths
-      .map(s => `<li>${s}</li>`).join('');
-    document.getElementById('focusAreasList').innerHTML = result.diagnosis.focusAreas
-      .map(a => `<li>${a}</li>`).join('');
-    document.getElementById('recommendationsList').innerHTML = result.diagnosis.recommendations
-      .map(r => `<li>${r}</li>`).join('');
-
-    // Renderizar plano de treino
-    this.displayWorkoutPlan();
-  },
-
-  /**
-   * Exibe plano de treino
-   */
-  displayWorkoutPlan() {
-    const container = document.getElementById('workoutPlanContent');
-    if (!container || !this.result.workoutPlan) return;
-
-    container.innerHTML = this.result.workoutPlan.map((day, index) => `
-      <div class="workout-day">
-        <div class="workout-day-header" onclick="this.nextElementSibling.classList.toggle('active')">
-          <span>${day.day} - ${day.focus}</span>
-          <span>▼</span>
-        </div>
-        <div class="workout-day-content ${index === 0 ? 'active' : ''}">
-          ${day.exercises.map(ex => `
-            <div class="exercise">
-              <div class="exercise-name">💪 ${ex.name}</div>
-              <div class="exercise-details">
-                <div class="exercise-detail">
-                  <div class="exercise-detail-label">Séries</div>
-                  <div>${ex.sets}</div>
-                </div>
-                <div class="exercise-detail">
-                  <div class="exercise-detail-label">Repetições</div>
-                  <div>${ex.reps}</div>
-                </div>
-                <div class="exercise-detail">
-                  <div class="exercise-detail-label">Descanso</div>
-                  <div>${ex.rest}s</div>
-                </div>
-              </div>
-            </div>
-          `).join('')}
-          ${day.notes ? `<div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); font-size: 0.875rem; color: var(--text-secondary);">
-            <strong>Notas:</strong><br>
-            ${day.notes.map(n => `• ${n}`).join('<br>')}
-          </div>` : ''}
-        </div>
-      </div>
-    `).join('');
-  },
-
-  /**
-   * Exporta PDF
-   */
-  async exportPDF() {
-    if (!this.result) {
-      alert('Nenhum resultado disponível');
-      return;
-    }
-
-    await pdf.exportReport(this.assessmentData, this.result);
-    this.nextStep();
-  },
-
-  /**
-   * Compartilha no WhatsApp
-   */
-  shareWhatsApp() {
-    const result = this.result;
-    const name = this.assessmentData.personalData.fullName || 'Usuário';
-
-    const message = `Olá! Realizei minha avaliação fitness no Vitalis e gostaria de compartilhar meus resultados:
-
-📊 *Meu Perfil Fitness*
-• Nome: ${name}
-• IMC: ${result.profile.bmi} (${result.profile.bmiCategory})
-• TMB: ${result.profile.bmr} kcal/dia
-• TDEE: ${result.profile.tdee} kcal/dia
-• Classificação: ${result.profile.classification}
-
-💪 *Pontos Fortes*
-${result.diagnosis.strengths.map(s => `• ${s}`).join('\n')}
-
-⚠️ *Pontos de Atenção*
-${result.diagnosis.focusAreas.map(a => `• ${a}`).join('\n')}
-
-Você pode fazer sua avaliação em: https://vitalis.app`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
-
-    this.nextStep();
-  },
-
-  /**
-   * Reinicia avaliação
-   */
-  restart() {
-    this.currentStep = 0;
-    this.assessmentData = {
-      personalData: {},
-      goalData: {},
-      trainingHistoryData: {},
-      healthData: { diseases: [], injuries: [], pains: [], medications: [], surgeries: [], restrictions: [] },
-      habitsData: {},
-      nutritionData: { allergies: [], intolerances: [], diets: [] },
-      availabilityData: { availableDays: [], equipment: [] }
-    };
-    this.result = null;
-    this.showStep(0);
-    window.scrollTo(0, 0);
-  }
-};
-
-// Inicializar quando o DOM estiver pronto
-document.addEventListener('DOMContentLoaded', () => {
-  app.init();
+    b.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
+  });
 });
+
+// ── DAY BUTTONS ──────────────────────────────────────────────
+document.querySelectorAll('.day-btn').forEach(b => {
+  b.addEventListener('click', function() { this.classList.toggle('sel'); });
+  b.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
+});
+
+// ── TOGGLES ──────────────────────────────────────────────────
+function tgl(id) { const el = document.getElementById(id); if (el) el.classList.toggle('on'); }
+document.querySelectorAll('.tgl-row').forEach(r => {
+  r.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
+});
+
+// ── TAG INPUT ────────────────────────────────────────────────
+function addTag(e, cid) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const inp = e.target;
+    const val = inp.value.trim().replace(/,/g, '');
+    if (!val) return;
+    const box = document.getElementById(cid);
+    const t = document.createElement('div');
+    t.className = 'tag-item';
+    t.innerHTML = `<span>${escHtml(val)}</span><button class="tag-rm" onclick="this.parentElement.remove()" aria-label="Remover">×</button>`;
+    box.insertBefore(t, inp);
+    inp.value = '';
+  }
+}
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+document.querySelectorAll('.tag-box').forEach(b => {
+  b.addEventListener('click', function(e) { if (e.target === this) this.querySelector('.tag-in').focus(); });
+});
+
+// ── STATE ────────────────────────────────────────────────────
+let step = 1;
+const TOTAL = 8;
+let fd = {};
+
+// ── FORM NAVIGATION ──────────────────────────────────────────
+function startForm() { step = 1; show('s-form'); updatePrg(); }
+
+function updatePrg() {
+  const pct = Math.round((step / TOTAL) * 100);
+  document.getElementById('prgFill').style.width = pct + '%';
+  document.getElementById('prgLbl').textContent = `Etapa ${step} de ${TOTAL}`;
+  document.getElementById('prgPct').textContent = pct + '%';
+  for (let i = 1; i <= TOTAL; i++) {
+    const el = document.getElementById(`st${i}`);
+    if (el) el.classList.toggle('hide', i !== step);
+  }
+  document.getElementById('btnVoltar').style.display = step === 1 ? 'none' : '';
+  const pBtn = document.getElementById('btnProx');
+  if (step === TOTAL) {
+    pBtn.innerHTML = 'Processar Avaliação <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>';
+  } else {
+    pBtn.innerHTML = 'Próximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+  if (step === TOTAL) buildSummary();
+}
+
+function validate(s) {
+  if (s === 1) {
+    if (!document.getElementById('f-nome').value.trim()) { toast('Por favor, informe seu nome'); return false; }
+    const idade = +document.getElementById('f-idade').value;
+    if (!idade || idade < 10 || idade > 99) { toast('Informe uma idade válida (10–99)'); return false; }
+    const alt = +document.getElementById('f-altura').value;
+    if (!alt || alt < 100 || alt > 250) { toast('Informe uma altura válida em cm'); return false; }
+    const peso = +document.getElementById('f-peso').value;
+    if (!peso || peso < 30 || peso > 300) { toast('Informe um peso válido em kg'); return false; }
+    if (!document.getElementById('f-genero').value) { toast('Selecione seu gênero'); return false; }
+  }
+  return true;
+}
+
+function nextStp() {
+  if (!validate(step)) return;
+  if (step < TOTAL) { step++; updatePrg(); window.scrollTo({ top: 0, behavior: 'instant' }); }
+  else { collectData(); process(); }
+}
+function prevStp() {
+  if (step > 1) { step--; updatePrg(); window.scrollTo({ top: 0, behavior: 'instant' }); }
+  else show('s-hero');
+}
+
+// ── DATA ─────────────────────────────────────────────────────
+function selVal(gid) { const s = document.querySelector(`#${gid} .ob.sel`); return s ? s.dataset.v : null; }
+function selDays() { const ds = []; document.querySelectorAll('.day-btn.sel').forEach(d => ds.push(d.dataset.d)); return ds; }
+
+function collectData() {
+  fd = {
+    nome:    document.getElementById('f-nome').value.trim(),
+    idade:   +document.getElementById('f-idade').value || 25,
+    genero:  document.getElementById('f-genero').value || 'masculino',
+    altura:  +document.getElementById('f-altura').value || 170,
+    peso:    +document.getElementById('f-peso').value || 70,
+    obj:     selVal('og-obj') || 'fitness-geral',
+    nivel:   selVal('og-niv') || 'iniciante',
+    dias:    +document.getElementById('f-dias').value || 3,
+    tempo:   selVal('ow-tmp') || '60',
+    local:   selVal('og-loc') || 'academia',
+    sono:    +document.getElementById('f-sono').value || 7,
+    agua:    +document.getElementById('f-agua').value || 2,
+    str:     selVal('ow-str') || 'moderado',
+    sonoQ:   selVal('ow-sono') || 'boa',
+    frut:    selVal('ow-frut') || 'diario',
+    ind:     selVal('ow-ind') || 'raramente',
+    hasP:    document.getElementById('t-pers').classList.contains('on'),
+    hasN:    document.getElementById('t-nutri').classList.contains('on'),
+    daysSel: selDays(),
+  };
+}
+
+// ── CALCULATIONS ─────────────────────────────────────────────
+function calcIMC(p, h) { return p / ((h / 100) ** 2); }
+function calcTMB(p, h, i, g) { return g === 'feminino' ? 10*p + 6.25*h - 5*i - 161 : 10*p + 6.25*h - 5*i + 5; }
+function actFact(d) { return d <= 1 ? 1.2 : d <= 3 ? 1.375 : d <= 5 ? 1.55 : 1.725; }
+function imcStatus(v) {
+  if (v < 18.5) return { lbl: 'Abaixo do Peso', cls: 'bad',  mbg: 'background:var(--rbg);color:var(--red)' };
+  if (v < 25)   return { lbl: 'Peso Normal',    cls: 'good', mbg: 'background:var(--gbg);color:var(--green)' };
+  if (v < 30)   return { lbl: 'Sobrepeso',      cls: 'ok',   mbg: 'background:var(--ambg);color:var(--amber)' };
+                return { lbl: 'Obesidade',      cls: 'bad',  mbg: 'background:var(--rbg);color:var(--red)' };
+}
+
+// ── LOADING ──────────────────────────────────────────────────
+function process() {
+  show('s-load');
+  const ids = ['ls1','ls2','ls3','ls4'];
+  let i = 0;
+  function tick() {
+    if (i > 0) {
+      const p = document.getElementById(ids[i-1]);
+      p.className = 'ls done';
+      p.textContent = '✅ ' + p.textContent.replace(/^[^\s]+\s/, '');
+    }
+    if (i < ids.length) {
+      document.getElementById(ids[i]).className = 'ls act';
+      i++;
+      setTimeout(tick, 650 + Math.random() * 350);
+    } else {
+      setTimeout(() => { buildResults(); show('s-res'); }, 400);
+    }
+  }
+  tick();
+}
+
+// ── RESULTS ──────────────────────────────────────────────────
+const objLabel = { 'perder-peso':'Perder Peso','ganhar-massa':'Ganhar Massa','resistencia':'Resistência','fitness-geral':'Fitness Geral' };
+const nivLabel = { 'iniciante':'Iniciante','intermediario':'Intermediário','avancado':'Avançado' };
+const locLabel = { 'casa':'Casa','academia':'Academia','ar-livre':'Ar Livre','misto':'Misto' };
+const genLabel = { 'masculino':'Masculino','feminino':'Feminino','outro':'Outro' };
+
+function buildResults() {
+  const d = fd;
+  const iv = calcIMC(d.peso, d.altura);
+  const tb = calcTMB(d.peso, d.altura, d.idade, d.genero);
+  const td = tb * actFact(d.dias);
+  const aguaML = Math.round(d.peso * 35);
+  const st = imcStatus(iv);
+  const nome = d.nome ? d.nome.split(' ')[0] : 'Usuário';
+
+  document.getElementById('r-nm').textContent = nome;
+  document.getElementById('r-imc').textContent = iv.toFixed(1);
+  document.getElementById('r-imc-cat').textContent = st.lbl;
+  document.getElementById('r-tmb').textContent = Math.round(tb);
+  document.getElementById('r-tdee').textContent = Math.round(td);
+  document.getElementById('r-agua').textContent = aguaML;
+
+  const badge = document.getElementById('r-badge');
+  badge.textContent = '● ' + st.lbl;
+  badge.className = 'sc-badge ' + st.cls;
+
+  const mb = document.getElementById('r-imc-bg');
+  mb.textContent = st.lbl;
+  mb.style.cssText = st.mbg + ';padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600';
+
+  const f = [];
+  if (d.dias >= 3) f.push({ ic:'g', sy:'✓', tx:`Frequência de ${d.dias} dias/semana — consistente para resultados sólidos.` });
+  if (d.sonoQ === 'boa' || d.sonoQ === 'excelente') f.push({ ic:'g', sy:'✓', tx:'Qualidade de sono boa — essencial para recuperação muscular e hormônios.' });
+  if (d.frut === 'diario') f.push({ ic:'g', sy:'✓', tx:'Consumo diário de frutas e verduras — excelente base nutricional.' });
+  if (d.str === 'baixo' || d.str === 'moderado') f.push({ ic:'g', sy:'✓', tx:'Nível de estresse controlado — menor interferência no cortisol e recuperação.' });
+  if (!f.length) f.push({ ic:'g', sy:'✓', tx:'Fazer esta avaliação já é o primeiro passo — parabéns pela iniciativa!' });
+
+  const a = [];
+  if (iv >= 25) a.push({ ic:'w', sy:'!', tx:`IMC ${iv.toFixed(1)} indica ${st.lbl.toLowerCase()}. Déficit calórico e aeróbico são recomendados.` });
+  if (d.agua < 2) a.push({ ic:'w', sy:'!', tx:`Ingestão de água baixa (${d.agua}L). Ideal para seu peso: ${(aguaML/1000).toFixed(1)}L/dia.` });
+  if (d.sonoQ === 'ruim' || d.sonoQ === 'razoavel') a.push({ ic:'w', sy:'!', tx:'Sono insatisfatório impacta diretamente recuperação, hormônios e composição corporal.' });
+  if (d.str === 'alto' || d.str === 'muito-alto') a.push({ ic:'w', sy:'!', tx:'Estresse elevado pode sabotear seus resultados — considere técnicas de gestão.' });
+  if (!a.length) a.push({ ic:'w', sy:'!', tx:'Mantenha a consistência — pequenos retrocessos são parte normal do processo.' });
+
+  const r = [];
+  const calMeta = d.obj === 'perder-peso' ? Math.round(td-400) : d.obj === 'ganhar-massa' ? Math.round(td+300) : Math.round(td);
+  const tipo = d.obj === 'perder-peso' ? 'déficit' : d.obj === 'ganhar-massa' ? 'superávit' : 'manutenção';
+  r.push({ ic:'i', sy:'→', tx:`Meta calórica: ${calMeta} kcal/dia (${tipo}).` });
+  r.push({ ic:'i', sy:'→', tx:`Proteína: ${Math.round(d.peso*(d.nivel==='avancado'?2.2:1.8))}g/dia para ${d.obj==='ganhar-massa'?'hipertrofia':'preservação muscular'}.` });
+  if (!d.hasP) r.push({ ic:'i', sy:'→', tx:'Considere ao menos 1 sessão/semana com personal trainer para ajuste técnico.' });
+  r.push({ ic:'i', sy:'→', tx:'Reavalie métricas a cada 4 semanas para ajustar o plano conforme evolução.' });
+
+  renderList('r-fortes', f);
+  renderList('r-atenc', a);
+  renderList('r-rec', r);
+  buildWorkout();
+}
+
+function renderList(id, items) {
+  document.getElementById(id).innerHTML = items.map(i =>
+    `<div class="a-item"><div class="a-ic ${i.ic}">${i.sy}</div><div>${i.tx}</div></div>`
+  ).join('');
+}
+
+// ── WORKOUT ──────────────────────────────────────────────────
+function buildWorkout() {
+  const d = fd;
+  const dias = d.daysSel.length > 0 ? d.daysSel : ['Seg','Qua','Sex'];
+  const plans = {
+    'ganhar-massa': [
+      { n:'Peito + Tríceps',  ex:[{n:'Supino Reto',s:'4×10-12',t:'Peito'},{n:'Supino Inclinado',s:'3×10',t:'Peito'},{n:'Crucifixo',s:'3×12-15',t:'Peito'},{n:'Tríceps Corda',s:'3×12',t:'Tríceps'},{n:'Tríceps Francês',s:'3×10',t:'Tríceps'}] },
+      { n:'Costas + Bíceps',  ex:[{n:'Puxada Aberta',s:'4×10-12',t:'Costas'},{n:'Remada Curvada',s:'4×10',t:'Costas'},{n:'Remada Unilateral',s:'3×12',t:'Costas'},{n:'Rosca Direta',s:'3×12',t:'Bíceps'},{n:'Rosca Martelo',s:'3×10',t:'Bíceps'}] },
+      { n:'Pernas + Glúteos', ex:[{n:'Agachamento Livre',s:'4×10-12',t:'Quadríceps'},{n:'Leg Press',s:'4×12',t:'Quadríceps'},{n:'Cadeira Extensora',s:'3×15',t:'Quadríceps'},{n:'Mesa Flexora',s:'3×12',t:'Posterior'},{n:'Panturrilha Em Pé',s:'4×15',t:'Panturrilha'}] },
+      { n:'Ombros + Core',    ex:[{n:'Desenvolvimento Livre',s:'4×10',t:'Ombros'},{n:'Elevação Lateral',s:'3×15',t:'Ombros'},{n:'Elevação Frontal',s:'3×12',t:'Ombros'},{n:'Prancha',s:'3×60s',t:'Core'},{n:'Abdominal Infra',s:'3×15',t:'Core'}] },
+    ],
+    'perder-peso': [
+      { n:'Full Body A',       ex:[{n:'Agachamento Livre',s:'3×15',t:'Legs'},{n:'Supino Inclinado',s:'3×12',t:'Peito'},{n:'Remada Cabos',s:'3×12',t:'Costas'},{n:'Stiff',s:'3×15',t:'Posterior'},{n:'Trote 20min',s:'1×20min',t:'Cardio'}] },
+      { n:'Full Body B',       ex:[{n:'Leg Press',s:'3×15',t:'Quadríceps'},{n:'Puxada Frente',s:'3×12',t:'Costas'},{n:'Desenvolvimento',s:'3×12',t:'Ombros'},{n:'Panturrilha',s:'3×20',t:'Panturrilha'},{n:'Bike 20min',s:'1×20min',t:'Cardio'}] },
+      { n:'Full Body C + HIIT',ex:[{n:'Agachamento Sumô',s:'3×15',t:'Glúteo'},{n:'Crucifixo',s:'3×15',t:'Peito'},{n:'Prancha',s:'3×45s',t:'Core'},{n:'Abdominal Reto',s:'3×20',t:'Core'},{n:'HIIT 15min',s:'1×15min',t:'Cardio'}] },
+    ],
+    'fitness-geral': [
+      { n:'Superior A',        ex:[{n:'Supino Reto',s:'3×12',t:'Peito'},{n:'Puxada Frente',s:'3×12',t:'Costas'},{n:'Desenvolvimento',s:'3×12',t:'Ombros'},{n:'Rosca Direta',s:'3×12',t:'Bíceps'},{n:'Tríceps Corda',s:'3×12',t:'Tríceps'}] },
+      { n:'Inferior',          ex:[{n:'Agachamento',s:'3×12',t:'Quadríceps'},{n:'Leg Press',s:'3×15',t:'Quadríceps'},{n:'Mesa Flexora',s:'3×12',t:'Posterior'},{n:'Abdutor',s:'3×15',t:'Glúteo'},{n:'Panturrilha',s:'4×15',t:'Panturrilha'}] },
+      { n:'Superior B + Core', ex:[{n:'Remada Curvada',s:'3×12',t:'Costas'},{n:'Crucifixo',s:'3×12',t:'Peito'},{n:'Elevação Lateral',s:'3×15',t:'Ombros'},{n:'Prancha',s:'3×45s',t:'Core'},{n:'Abdomen Oblíquo',s:'3×15',t:'Core'}] },
+    ],
+    'resistencia': [
+      { n:'Resistência A',     ex:[{n:'Corrida Contínua',s:'1×30min',t:'Cardio'},{n:'Agachamento',s:'4×20',t:'Força'},{n:'Supino Leve',s:'4×20',t:'Força'},{n:'Prancha',s:'3×60s',t:'Core'}] },
+      { n:'HIIT + Força',      ex:[{n:'HIIT Tiro Curto',s:'8×30s',t:'Cardio'},{n:'Remada Cabos',s:'4×20',t:'Costas'},{n:'Desenvolvimento',s:'4×15',t:'Ombros'},{n:'Abdominal',s:'3×20',t:'Core'}] },
+      { n:'Endurance',         ex:[{n:'Bike ou Elíptico',s:'1×45min',t:'Cardio'},{n:'Leg Press Leve',s:'4×20',t:'Pernas'},{n:'Flexão de Braço',s:'3×máx',t:'Peito'},{n:'Abdominal Reto',s:'4×20',t:'Core'}] },
+    ],
+  };
+  const plan = plans[d.obj] || plans['fitness-geral'];
+  const c = document.getElementById('wk-container');
+  c.innerHTML = dias.map((dia, i) => {
+    const t = plan[i % plan.length];
+    return `<div class="wd" id="wd${i}">
+      <div class="wd-hdr" onclick="toggleWD('wd${i}')">
+        <div><div class="wd-t">${dia} — ${t.n}</div><div class="wd-s">${t.ex.length} exercícios · ${d.tempo}min</div></div>
+        <span class="wd-chv">⌄</span>
+      </div>
+      <div class="wd-exs">
+        ${t.ex.map((ex, j) => `<div class="ex-row"><div class="ex-num">${j+1}</div><div class="ex-inf"><div class="ex-n">${ex.n}</div><div class="ex-d">${ex.s}</div></div><div class="ex-tg">${ex.t}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  const first = document.getElementById('wd0');
+  if (first) first.classList.add('open');
+}
+function toggleWD(id) { const el = document.getElementById(id); if (el) el.classList.toggle('open'); }
+
+// ── SUMMARY ──────────────────────────────────────────────────
+function buildSummary() {
+  const nome  = document.getElementById('f-nome').value.trim() || '—';
+  const idade = document.getElementById('f-idade').value || '—';
+  const alt   = document.getElementById('f-altura').value || '—';
+  const peso  = document.getElementById('f-peso').value || '—';
+  const gen   = document.getElementById('f-genero').value || '—';
+  const obj   = selVal('og-obj') || '—';
+  const niv   = selVal('og-niv') || '—';
+  const dias  = document.getElementById('f-dias').value;
+  const loc   = selVal('og-loc') || '—';
+  document.getElementById('st8').innerHTML = `
+    <div class="stp-t">Confirme seus Dados</div>
+    <div class="stp-s">Revise as informações antes de processar sua avaliação.</div>
+    <div class="sum-card">
+      <h3>Dados Pessoais</h3>
+      <div class="sum-row"><span class="s-lbl">Nome</span><span class="s-val">${escHtml(nome)}</span></div>
+      <div class="sum-row"><span class="s-lbl">Idade</span><span class="s-val">${idade} anos</span></div>
+      <div class="sum-row"><span class="s-lbl">Altura</span><span class="s-val">${alt} cm</span></div>
+      <div class="sum-row"><span class="s-lbl">Peso</span><span class="s-val">${peso} kg</span></div>
+      <div class="sum-row"><span class="s-lbl">Gênero</span><span class="s-val">${genLabel[gen]||gen}</span></div>
+    </div>
+    <div class="sum-card">
+      <h3>Treino & Objetivos</h3>
+      <div class="sum-row"><span class="s-lbl">Objetivo</span><span class="s-val">${objLabel[obj]||obj}</span></div>
+      <div class="sum-row"><span class="s-lbl">Nível</span><span class="s-val">${nivLabel[niv]||niv}</span></div>
+      <div class="sum-row"><span class="s-lbl">Dias/semana</span><span class="s-val">${dias}</span></div>
+      <div class="sum-row"><span class="s-lbl">Local</span><span class="s-val">${locLabel[loc]||loc}</span></div>
+    </div>
+    <div class="notice">🔒 <span>Todos os dados são processados <strong>100% localmente</strong>. Nenhuma informação é enviada ou armazenada.</span></div>`;
+}
+
+// ── EXPORT ───────────────────────────────────────────────────
+function exportPDF() { toast('PDF em breve — recurso em desenvolvimento!'); }
+function shareWA() {
+  if (!fd.nome) { toast('Complete a avaliação primeiro'); return; }
+  const iv = calcIMC(fd.peso, fd.altura).toFixed(1);
+  const tb = Math.round(calcTMB(fd.peso, fd.altura, fd.idade, fd.genero));
+  const msg = `*Vitalis — Minha Avaliação Fitness*\n\n👤 *${fd.nome}*\n📊 IMC: ${iv} (${imcStatus(+iv).lbl})\n🔥 TMB: ${tb} kcal/dia\n🎯 Objetivo: ${objLabel[fd.obj]||fd.obj}\n💪 Nível: ${nivLabel[fd.nivel]||fd.nivel}\n\n_Gerado pelo Vitalis_`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ── RESET ────────────────────────────────────────────────────
+function reset() {
+  fd = {}; step = 1;
+  ['f-nome','f-idade','f-altura','f-peso','f-pdej','f-mot'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['f-genero','f-prazo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.querySelectorAll('.ob.sel').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('.day-btn.sel').forEach(b => b.classList.remove('sel'));
+  document.querySelectorAll('.tgl.on').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.tag-item').forEach(t => t.remove());
+  ['ow-frut','ow-ind','ow-tmp','og-loc'].forEach(gid => {
+    const defaults = { 'ow-frut':'diario','ow-ind':'nunca','ow-tmp':'60','og-loc':'academia' };
+    const btn = document.querySelector(`#${gid} [data-v="${defaults[gid]}"]`);
+    if (btn) btn.classList.add('sel');
+  });
+  show('s-hero');
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('on'), 2800);
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+document.getElementById('btnVoltar').style.display = 'none';
+
+// Prevent double-tap zoom on iOS (keep inputs working)
+let _lt = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  const tag = e.target.tagName;
+  if (now - _lt < 350 && tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+    e.preventDefault();
+  }
+  _lt = now;
+}, { passive: false });
