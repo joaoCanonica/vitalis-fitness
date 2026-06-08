@@ -3,14 +3,18 @@
 // ── THEME ───────────────────────────────────────────────────
 const root = document.documentElement;
 function setTheme(t) {
-  root.setAttribute('data-theme', t);
-  document.getElementById('themeIco').textContent = t === 'dark' ? '☀️' : '🌙';
-  const mc = document.getElementById('metaThemeColor');
-  if (mc) mc.content = t === 'dark' ? '#0a0a0f' : '#ffffff';
-  try { localStorage.setItem('vt', t); } catch(e) {}
+  try {
+    root.setAttribute('data-theme', t);
+    const ico = document.getElementById('themeIco');
+    if (ico) ico.textContent = t === 'dark' ? '☀️' : '🌙';
+    const mc = document.getElementById('metaThemeColor');
+    if (mc) mc.content = t === 'dark' ? '#0a0a0f' : '#ffffff';
+    try { localStorage.setItem('vt', t); } catch(e) {}
+  } catch(e) {}
 }
 function toggleTheme() { setTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
-document.getElementById('themeBtn').addEventListener('click', toggleTheme);
+const themeBtn = document.getElementById('themeBtn');
+if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
 (function() {
   try {
     const s = localStorage.getItem('vt');
@@ -21,33 +25,41 @@ document.getElementById('themeBtn').addEventListener('click', toggleTheme);
 
 // ── SCREENS ─────────────────────────────────────────────────
 function show(id) {
-  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
-  const el = document.getElementById(id);
-  if (el) { el.classList.add('on'); window.scrollTo({ top: 0, behavior: 'instant' }); }
+  try {
+    document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('on'); window.scrollTo(0, 0); }
+  } catch(e) {}
 }
 
 // ── OPTION BUTTONS ───────────────────────────────────────────
-document.querySelectorAll('.og, .oi-wrap').forEach(g => {
-  g.querySelectorAll('.ob').forEach(b => {
-    b.addEventListener('click', function() {
-      g.querySelectorAll('.ob').forEach(x => x.classList.remove('sel'));
-      this.classList.add('sel');
+try {
+  document.querySelectorAll('.og, .oi-wrap').forEach(g => {
+    g.querySelectorAll('.ob').forEach(b => {
+      b.addEventListener('click', function() {
+        g.querySelectorAll('.ob').forEach(x => x.classList.remove('sel'));
+        this.classList.add('sel');
+      });
+      b.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
     });
-    b.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
   });
-});
+} catch(e) {}
 
 // ── DAY BUTTONS ──────────────────────────────────────────────
-document.querySelectorAll('.day-btn').forEach(b => {
-  b.addEventListener('click', function() { this.classList.toggle('sel'); });
-  b.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
-});
+try {
+  document.querySelectorAll('.day-btn').forEach(b => {
+    b.addEventListener('click', function() { this.classList.toggle('sel'); });
+    b.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
+  });
+} catch(e) {}
 
 // ── TOGGLES ──────────────────────────────────────────────────
 function tgl(id) { const el = document.getElementById(id); if (el) el.classList.toggle('on'); }
-document.querySelectorAll('.tgl-row').forEach(r => {
-  r.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
-});
+try {
+  document.querySelectorAll('.tgl-row').forEach(r => {
+    r.addEventListener('touchend', function(e) { e.preventDefault(); this.click(); }, { passive: false });
+  });
+} catch(e) {}
 
 // ── TAG INPUT ────────────────────────────────────────────────
 function addTag(e, cid) {
@@ -69,9 +81,11 @@ function escHtml(s) {
   d.appendChild(document.createTextNode(s));
   return d.innerHTML;
 }
-document.querySelectorAll('.tag-box').forEach(b => {
-  b.addEventListener('click', function(e) { if (e.target === this) this.querySelector('.tag-in').focus(); });
-});
+try {
+  document.querySelectorAll('.tag-box').forEach(b => {
+    b.addEventListener('click', function(e) { if (e.target === this) this.querySelector('.tag-in').focus(); });
+  });
+} catch(e) {}
 
 // ── STATE ────────────────────────────────────────────────────
 let step = 1;
@@ -82,22 +96,30 @@ let fd = {};
 function startForm() { step = 1; show('s-form'); updatePrg(); }
 
 function updatePrg() {
-  const pct = Math.round((step / TOTAL) * 100);
-  document.getElementById('prgFill').style.width = pct + '%';
-  document.getElementById('prgLbl').textContent = `Etapa ${step} de ${TOTAL}`;
-  document.getElementById('prgPct').textContent = pct + '%';
-  for (let i = 1; i <= TOTAL; i++) {
-    const el = document.getElementById(`st${i}`);
-    if (el) el.classList.toggle('hide', i !== step);
-  }
-  document.getElementById('btnVoltar').style.display = step === 1 ? 'none' : '';
-  const pBtn = document.getElementById('btnProx');
-  if (step === TOTAL) {
-    pBtn.innerHTML = 'Processar Avaliação <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>';
-  } else {
-    pBtn.innerHTML = 'Próximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-  }
-  if (step === TOTAL) buildSummary();
+  try {
+    const pct = Math.round((step / TOTAL) * 100);
+    const prgFill = document.getElementById('prgFill');
+    if (prgFill) prgFill.style.width = pct + '%';
+    const prgLbl = document.getElementById('prgLbl');
+    if (prgLbl) prgLbl.textContent = `Etapa ${step} de ${TOTAL}`;
+    const prgPct = document.getElementById('prgPct');
+    if (prgPct) prgPct.textContent = pct + '%';
+    for (let i = 1; i <= TOTAL; i++) {
+      const el = document.getElementById(`st${i}`);
+      if (el) el.classList.toggle('hide', i !== step);
+    }
+    const btnVoltar = document.getElementById('btnVoltar');
+    if (btnVoltar) btnVoltar.style.display = step === 1 ? 'none' : '';
+    const pBtn = document.getElementById('btnProx');
+    if (pBtn) {
+      if (step === TOTAL) {
+        pBtn.innerHTML = 'Processar Avaliação <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>';
+      } else {
+        pBtn.innerHTML = 'Próximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      }
+    }
+    if (step === TOTAL) buildSummary();
+  } catch(e) {}
 }
 
 function validate(s) {
@@ -115,13 +137,17 @@ function validate(s) {
 }
 
 function nextStp() {
-  if (!validate(step)) return;
-  if (step < TOTAL) { step++; updatePrg(); window.scrollTo({ top: 0, behavior: 'instant' }); }
-  else { collectData(); process(); }
+  try {
+    if (!validate(step)) return;
+    if (step < TOTAL) { step++; updatePrg(); window.scrollTo(0, 0); }
+    else { collectData(); process(); }
+  } catch(e) {}
 }
 function prevStp() {
-  if (step > 1) { step--; updatePrg(); window.scrollTo({ top: 0, behavior: 'instant' }); }
-  else show('s-hero');
+  try {
+    if (step > 1) { step--; updatePrg(); window.scrollTo(0, 0); }
+    else show('s-hero');
+  } catch(e) {}
 }
 
 // ── DATA ─────────────────────────────────────────────────────
@@ -129,27 +155,31 @@ function selVal(gid) { const s = document.querySelector(`#${gid} .ob.sel`); retu
 function selDays() { const ds = []; document.querySelectorAll('.day-btn.sel').forEach(d => ds.push(d.dataset.d)); return ds; }
 
 function collectData() {
-  fd = {
-    nome:    document.getElementById('f-nome').value.trim(),
-    idade:   +document.getElementById('f-idade').value || 25,
-    genero:  document.getElementById('f-genero').value || 'masculino',
-    altura:  +document.getElementById('f-altura').value || 170,
-    peso:    +document.getElementById('f-peso').value || 70,
-    obj:     selVal('og-obj') || 'fitness-geral',
-    nivel:   selVal('og-niv') || 'iniciante',
-    dias:    +document.getElementById('f-dias').value || 3,
-    tempo:   selVal('ow-tmp') || '60',
-    local:   selVal('og-loc') || 'academia',
-    sono:    +document.getElementById('f-sono').value || 7,
-    agua:    +document.getElementById('f-agua').value || 2,
-    str:     selVal('ow-str') || 'moderado',
-    sonoQ:   selVal('ow-sono') || 'boa',
-    frut:    selVal('ow-frut') || 'diario',
-    ind:     selVal('ow-ind') || 'raramente',
-    hasP:    document.getElementById('t-pers').classList.contains('on'),
-    hasN:    document.getElementById('t-nutri').classList.contains('on'),
-    daysSel: selDays(),
-  };
+  try {
+    const tPers = document.getElementById('t-pers');
+    const tNutri = document.getElementById('t-nutri');
+    fd = {
+      nome:    (document.getElementById('f-nome') || {}).value?.trim() || '',
+      idade:   +(document.getElementById('f-idade') || {}).value || 25,
+      genero:  (document.getElementById('f-genero') || {}).value || 'masculino',
+      altura:  +(document.getElementById('f-altura') || {}).value || 170,
+      peso:    +(document.getElementById('f-peso') || {}).value || 70,
+      obj:     selVal('og-obj') || 'fitness-geral',
+      nivel:   selVal('og-niv') || 'iniciante',
+      dias:    +(document.getElementById('f-dias') || {}).value || 3,
+      tempo:   selVal('ow-tmp') || '60',
+      local:   selVal('og-loc') || 'academia',
+      sono:    +(document.getElementById('f-sono') || {}).value || 7,
+      agua:    +(document.getElementById('f-agua') || {}).value || 2,
+      str:     selVal('ow-str') || 'moderado',
+      sonoQ:   selVal('ow-sono') || 'boa',
+      frut:    selVal('ow-frut') || 'diario',
+      ind:     selVal('ow-ind') || 'raramente',
+      hasP:    tPers ? tPers.classList.contains('on') : false,
+      hasN:    tNutri ? tNutri.classList.contains('on') : false,
+      daysSel: selDays(),
+    };
+  } catch(e) {}
 }
 
 // ── CALCULATIONS ─────────────────────────────────────────────
@@ -165,24 +195,31 @@ function imcStatus(v) {
 
 // ── LOADING ──────────────────────────────────────────────────
 function process() {
-  show('s-load');
-  const ids = ['ls1','ls2','ls3','ls4'];
-  let i = 0;
-  function tick() {
-    if (i > 0) {
-      const p = document.getElementById(ids[i-1]);
-      p.className = 'ls done';
-      p.textContent = '✅ ' + p.textContent.replace(/^[^\s]+\s/, '');
+  try {
+    show('s-load');
+    const ids = ['ls1','ls2','ls3','ls4'];
+    let i = 0;
+    function tick() {
+      try {
+        if (i > 0) {
+          const p = document.getElementById(ids[i-1]);
+          if (p) {
+            p.className = 'ls done';
+            p.textContent = '✅ ' + p.textContent.replace(/^[^\s]+\s/, '');
+          }
+        }
+        if (i < ids.length) {
+          const cur = document.getElementById(ids[i]);
+          if (cur) cur.className = 'ls act';
+          i++;
+          setTimeout(tick, 650 + Math.random() * 350);
+        } else {
+          setTimeout(() => { buildResults(); show('s-res'); }, 400);
+        }
+      } catch(e) {}
     }
-    if (i < ids.length) {
-      document.getElementById(ids[i]).className = 'ls act';
-      i++;
-      setTimeout(tick, 650 + Math.random() * 350);
-    } else {
-      setTimeout(() => { buildResults(); show('s-res'); }, 400);
-    }
-  }
-  tick();
+    tick();
+  } catch(e) {}
 }
 
 // ── RESULTS ──────────────────────────────────────────────────
@@ -293,7 +330,12 @@ function buildWorkout() {
   const first = document.getElementById('wd0');
   if (first) first.classList.add('open');
 }
-function toggleWD(id) { const el = document.getElementById(id); if (el) el.classList.toggle('open'); }
+function toggleWD(id) {
+  try {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('open');
+  } catch(e) {}
+}
 
 // ── SUMMARY ──────────────────────────────────────────────────
 function buildSummary() {
@@ -356,14 +398,21 @@ function reset() {
 
 // ── TOAST ────────────────────────────────────────────────────
 function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('on');
-  clearTimeout(t._tid);
-  t._tid = setTimeout(() => t.classList.remove('on'), 2800);
+  try {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('on');
+    clearTimeout(t._tid);
+    t._tid = setTimeout(() => t.classList.remove('on'), 2800);
+  } catch(e) {}
 }
 
 // ── INIT ─────────────────────────────────────────────────────
-document.getElementById('btnVoltar').style.display = 'none';
+try {
+  const btnVoltar = document.getElementById('btnVoltar');
+  if (btnVoltar) btnVoltar.style.display = 'none';
+} catch(e) {}
 
 // Prevent double-tap zoom on iOS (keep inputs working)
 let _lt = 0;
@@ -375,3 +424,17 @@ document.addEventListener('touchend', function(e) {
   }
   _lt = now;
 }, { passive: false });
+
+// Expor funções globalmente
+window.startForm = startForm;
+window.nextStp = nextStp;
+window.prevStp = prevStp;
+window.show = show;
+window.tgl = tgl;
+window.addTag = addTag;
+window.exportPDF = exportPDF;
+window.shareWA = shareWA;
+window.reset = reset;
+window.toggleTheme = toggleTheme;
+window.toggleWD = toggleWD;
+window.buildWorkout = buildWorkout;
